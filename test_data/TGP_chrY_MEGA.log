@@ -1,0 +1,26 @@
+PLINK v1.90b6.4 64-bit (7 Aug 2018)
+Options in effect:
+  --bfile TGP_chrY_MEGA
+  --out TGP_chrY_MEGA
+  --recode AD
+
+Hostname: metalhead
+Working directory: /home/jonathan/y_haps/SNAPPY
+Start time: Mon Oct  8 20:41:53 2018
+
+Random number seed: 1539031313
+515884 MB RAM detected; reserving 257942 MB for main workspace.
+2366 variants loaded from .bim file.
+1233 people (0 males, 0 females, 1233 ambiguous) loaded from .fam.
+Ambiguous sex IDs written to TGP_chrY_MEGA.nosex .
+Using 1 thread (no multithreaded calculations invoked).
+Before main variant filters, 1233 founders and 0 nonfounders present.
+Calculating allele frequencies... done.
+Warning: Nonmissing nonmale Y chromosome genotype(s) present; many commands
+treat these as missing.
+Total genotyping rate is -nan.
+2366 variants and 1233 people pass filters and QC.
+Note: No phenotypes present.
+--recode AD to TGP_chrY_MEGA.raw ... done.
+
+End time: Mon Oct  8 20:41:53 2018

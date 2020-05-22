@@ -220,7 +220,7 @@ def assign_subgroups(path, samples, hg_scores, hg_to_snps, genotypes, issog_id_t
             group_to_parent[line[0]] = line[1]
 
     # score all hgs, then use to assign hg to individual
-    with open(path + '/' + out_prefix + '.out', 'w') as leaf_outfile, open(path + '/' + out_prefix + '.all', 'w') as all_outfile:
+    with open(out_prefix + '.out', 'w') as leaf_outfile, open(out_prefix + '.all', 'w') as all_outfile:
         print '\nPrinting results to .out and .all with prefix "%s"' % (out_prefix)
         for n in range(samples):
             hg_to_score = score_hgs(hg_scores, hg_to_snps, genotypes, n, issog_id_to_pos, group_to_parent)
@@ -231,7 +231,7 @@ def assign_subgroups(path, samples, hg_scores, hg_to_snps, genotypes, issog_id_t
 def main(args):
     path = os.getcwd()
     project_name = args.infile
-    raw = path + '/' + project_name + '.raw'
+    raw = project_name + '.raw'
 
     # create .raw plink file to interpret genotypes from binary files
     if not os.path.isfile(raw):
@@ -242,7 +242,7 @@ def main(args):
 
     # build reference dictionaries
     der_allele_dict = parse_ref_files.build_derived_allele_dict(path)
-    bim_id_dict, bim_allele_dict = parse_ref_files.build_bim_id_dict(path, project_name)
+    bim_id_dict, bim_allele_dict = parse_ref_files.build_bim_id_dict(project_name)
     hg_snp_dict = parse_ref_files.build_hg_snp_dict(path)
     issog_id_dict = parse_ref_files.build_isogg_id_dict(path)
 

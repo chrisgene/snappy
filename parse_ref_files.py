@@ -1,11 +1,11 @@
 import re
 
 
-def build_bim_id_dict(path, proj_name):
+def build_bim_id_dict(proj_name):
     """creates two dictionaries, one to map snp ids to positions and one for positions to observed alleles"""
     id_to_pos = dict()
     pos_to_alleles = dict()
-    with open(path + '/' + proj_name + '.bim', 'r') as bim:
+    with open(proj_name + '.bim', 'r') as bim:
         for line in bim:
             chrom, bim_id, cm_pos, pos, allele_1, allele_2 = line.rstrip('\n').split('\t')
             if allele_1 != '0' or allele_2 != '0':

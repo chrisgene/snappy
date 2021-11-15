@@ -1,11 +1,11 @@
 import re
 
 
-def build_bim_id_dict(path, proj_name):
+def build_bim_id_dict(filename):
     """creates two dictionaries, one to map snp ids to positions and one for positions to observed alleles"""
     id_to_pos = dict()
     pos_to_alleles = dict()
-    with open(path + '/' + proj_name + '.bim', 'r') as bim:
+    with open(filename, 'r') as bim:
         for line in bim:
             chrom, bim_id, cm_pos, pos, allele_1, allele_2 = line.rstrip('\n').split('\t')
             if allele_1 != '0' or allele_2 != '0':
@@ -15,25 +15,23 @@ def build_bim_id_dict(path, proj_name):
     return id_to_pos, pos_to_alleles
 
 
-def build_hg_snp_dict(path):
+def build_hg_snp_dict(filename):
     """creates a dictionary that maps haplogroups to defining snps"""
     hg_to_snps = dict()
+    with open(filename, 'r') as y_hg:
+    	print 'Opened %s to find haplogroup-informative SNPs.' % (filename)
+    	y_hg.readline()
+    	for line in y_hg:
+    		hg, snps = line.rstrip('\r\n').split('\t')
+    		hg_to_snps[hg] = snps.split(',')
+	return hg_to_snps
 
-    with open(path + '/ref_files/y_hg_and_snps.sort', 'r') as y_hg:
-        y_hg.readline()
-        for line in y_hg:
-            hg, snps = line.rstrip('\r\n').split('\t')
-            hg_to_snps[hg] = snps.split(',')
 
-    return hg_to_snps
-
-
-def build_isogg_id_dict(path):
+def build_isogg_id_dict(filename):
     """creates a dictionary which maps isogg ids to positions from three reference files"""
     snp_id_to_pos = dict()
-    file = path + '/ref_files/id_to_pos.txt'
-    with open(file, 'r') as infp:
-    	print 'Creating id to position map from %s' % file
+    with open(filename, 'r') as infp:
+    	print 'Creating id to position map from %s' % filename
     	header = infp.readline()
     	for line in infp:
     		(id, pos) = line.strip('\r\n').split('\t')
@@ -46,12 +44,11 @@ def build_isogg_id_dict(path):
     return snp_id_to_pos
 
 
-def build_derived_allele_dict(path):
+def build_derived_allele_dict(filename):
     """creates a dictionary that maps a position to a string containing the derived and ancestral alleles"""
     derived_dict = dict()
-    file = path + '/ref_files/pos_to_allele.txt'
-    with open(file, 'r') as infp:
-    	print '\nCreating position to allele map from %s' % file
+    with open(filename, 'r') as infp:
+    	print '\nCreating position to allele map from %s' % filename
     	header = infp.readline()
     	for line in infp:
     		(pos, anc, der) = line.rstrip('\r\n').split('\t')
@@ -62,3 +59,14 @@ def build_derived_allele_dict(path):
     			print 'Warning: pos %s is duplicated' % (pos)
     			
     return derived_dict
+
+def getHaploGroup2Parent(filename):
+	'''create a dictionary that sends a hg to its parent hg for haplogroup names that don't conform to naming conventions'''
+	group_to_parent = dict()
+	with open(filename, 'r') as weird_hgs:
+		for line in weird_hgs:
+			line = line.rstrip('\n').split('\t')
+			group_to_parent[line[0]] = line[1]
+	return group_to_parent
+
+    

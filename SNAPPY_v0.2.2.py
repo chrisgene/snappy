@@ -232,7 +232,7 @@ def main(args):
     	if os.path.isfile(bed):
     		print('Using plink to create .raw file from %s plink library' % (project_name))
     		subprocess.call(['plink', '--bfile', project_name, '--recodeAD', '--out', project_name])
-    	if os.path.isfile(vcf):
+    	elif os.path.isfile(vcf):
     		print('Using plink to create .raw file from vcf %s' % (vcf))
     		#subprocess.call(['plink', '--vcf', project_name, '--recodeAD', '--out', project_name])
 		subprocess.call(['plink', '--vcf', '%s.vcf' % (project_name), '--recodeAD', '--out', project_name])

@@ -19,19 +19,19 @@ def build_hg_snp_dict(filename):
     """creates a dictionary that maps haplogroups to defining snps"""
     hg_to_snps = dict()
     with open(filename, 'r') as y_hg:
-    	print 'Opened %s to find haplogroup-informative SNPs.' % (filename)
+    	print('Opened %s to find haplogroup-informative SNPs.' % (filename))
     	y_hg.readline()
     	for line in y_hg:
     		hg, snps = line.rstrip('\r\n').split('\t')
     		hg_to_snps[hg] = snps.split(',')
-	return hg_to_snps
+    return hg_to_snps
 
 
 def build_isogg_id_dict(filename):
     """creates a dictionary which maps isogg ids to positions from three reference files"""
     snp_id_to_pos = dict()
     with open(filename, 'r') as infp:
-    	print 'Creating id to position map from %s' % filename
+    	print('Creating id to position map from %s' % filename)
     	header = infp.readline()
     	for line in infp:
     		(id, pos) = line.strip('\r\n').split('\t')
@@ -39,7 +39,7 @@ def build_isogg_id_dict(filename):
     		if not id in snp_id_to_pos:
     			snp_id_to_pos[id] = pos
     		else:
-    			print 'Warning: id %s is duplicated' % (id)
+    			print('Warning: id %s is duplicated' % (id))
 
     return snp_id_to_pos
 
@@ -48,7 +48,7 @@ def build_derived_allele_dict(filename):
     """creates a dictionary that maps a position to a string containing the derived and ancestral alleles"""
     derived_dict = dict()
     with open(filename, 'r') as infp:
-    	print '\nCreating position to allele map from %s' % filename
+    	print('\nCreating position to allele map from %s' % filename)
     	header = infp.readline()
     	for line in infp:
     		(pos, anc, der) = line.rstrip('\r\n').split('\t')
@@ -56,7 +56,7 @@ def build_derived_allele_dict(filename):
     		if not pos in derived_dict:
     			derived_dict[pos] = der + anc
     		else:
-    			print 'Warning: pos %s is duplicated' % (pos)
+    			print('Warning: pos %s is duplicated' % (pos))
     			
     return derived_dict
 

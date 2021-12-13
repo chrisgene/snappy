@@ -232,9 +232,10 @@ def main(args):
     	if os.path.isfile(bed):
     		print 'Using plink to create .raw file from %s plink library' % (project_name)
     		subprocess.call(['plink', '--bfile', project_name, '--recodeAD', '--out', project_name])
-    	if os.path.isfile(vcf):
-    		print 'Using plink to create .raw file from vcf %s' % (vcf)
-    		subprocess.call(['plink', '--vcf', project_name, '--recodeAD', '--out', project_name])
+    	elif os.path.isfile(vcf):
+    		print('Using plink to create .raw file from vcf %s' % (vcf))
+    		#subprocess.call(['plink', '--vcf', project_name, '--recodeAD', '--out', project_name])
+		subprocess.call(['plink', '--vcf', '%s.vcf' % (project_name), '--recodeAD', '--out', project_name])
     	else:
     		print 'Unable to find suitable genotpye files for processing. Please ensure that there is a plink library or vcf with the prefix provided (%s)' % (file_prefix)
     else:

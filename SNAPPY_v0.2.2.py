@@ -120,7 +120,7 @@ def score_hgs(hg_scores, hg_to_snps, genotypes, n, issog_id_to_pos, group_to_par
         return all_hg_to_score
 
 
-def pick_leaf(hg_to_score, group_to_parent, outfile, sample_id, min_hap_score, min_deep_score, hg_to_snps):
+def pick_leaf(hg_to_score, group_to_parent, outfile, sample_id, min_hap_score, min_deep_score, hg_to_snps, trunc_haps):
     """
     of the non-zero scored haplogroups collect all of the leaves, ie those which are not ancestral to any other
     non-zero haplogroup. Then, choose the group with the highest score and longest name
@@ -155,26 +155,26 @@ def pick_leaf(hg_to_score, group_to_parent, outfile, sample_id, min_hap_score, m
     	max_score = hg_to_score[max_leaf]
     except:
     	max_score = 0
-    if leaves:
-    	# find leaf with highest hg score
-    	max_leaf = list(leaves)[0]					# just initializing variable
+    if leaves: # find leaf with highest hg score
+    	# just initializing variable
+    	max_leaf = list(leaves)[0]
     	max_score = hg_to_score[max_leaf]
     	for leaf in leaves:
-        	if max_score < hg_to_score[leaf]:
-        		max_leaf = leaf
-        		max_score = hg_to_score[leaf]
-
+    		if max_score < hg_to_score[leaf]:
+    			max_leaf = leaf
+    			max_score = hg_to_score[leaf]
     	# check if there is a more derived leaf with a high score
     	longest_leaf = max(leaves, key=len)
-    	if len(max_leaf) < len(longest_leaf) and hg_to_score[longest_leaf] >= min_deep_score: 
-        	max_leaf = longest_leaf
-        	max_score = hg_to_score[longest_leaf]
-    elif max_score < min_hap_score:							# might be better to issue a warning, then just make assignment to highest score that is most derived, or create option to just assign as root
+    	if len(max_leaf) < len(longest_leaf) and hg_to_score[longest_leaf] >= min_deep_score:
+    		max_leaf = longest_leaf
+    		max_score = hg_to_score[longest_leaf]
+    # might be better to issue a warning, then just make assignment to highest score that is most derived, or create option to just assign as root	
+    elif max_score < min_hap_score:
     	print('%s: No supported leaf haplogroup available. Assigning default root haplogroup A0-T. See .all file for best assignments.' % (sample_id))    
-        
+    assign_hg = trunc_haps[max_leaf]    
     # write to output file
-    hg_snps = ','.join(hg_to_snps[max_leaf])
-    outfile.write('%s\t%s\t%s\t%s\n' % (sample_id, max_leaf, str(round(max_score, 3)), hg_snps))
+    hg_snps = ','.join(hg_to_snps[max_leaf])		#still showing markers for haplogroup, not the trunated haplogroup
+    outfile.write('%s\t%s\t%s\t%s\n' % (sample_id, assign_hg, str(round(max_score, 3)), hg_snps))
 
 
 def get_all_subgroups(hg_to_score, fi, sample_id):
@@ -206,7 +206,7 @@ def get_all_subgroups(hg_to_score, fi, sample_id):
         line.append(top_candidates[i] + ':' + str(round(candidate_scores[i], 3)))
     fi.write(str(sample_id) + '\t' + '\t'.join(line) + '\n')
 
-def assign_subgroups(path, group_to_parent, samples, hg_scores, hg_to_snps, genotypes, issog_id_to_pos, sample_id, min_hap_score , min_deep_score, out_prefix, ancestral_hg_depth):
+def assign_subgroups(path, group_to_parent, samples, hg_scores, hg_to_snps, genotypes, issog_id_to_pos, sample_id, min_hap_score , min_deep_score, out_prefix, ancestral_hg_depth, trunc_haps):
     """For a sample, score all the hgs based on # derived alleles, then assign hg"""
     print('\nNow finding best-supported haplogroup for each individual')
     print('Minimum considered haplogroup score = %s' % (min_hap_score))
@@ -216,8 +216,56 @@ def assign_subgroups(path, group_to_parent, samples, hg_scores, hg_to_snps, geno
         print('\nPrinting results to .out and .all with prefix "%s"' % (out_prefix))
         for n in range(samples):
             hg_to_score = score_hgs(hg_scores, hg_to_snps, genotypes, n, issog_id_to_pos, group_to_parent, ancestral_hg_depth)
-            pick_leaf(hg_to_score, group_to_parent, leaf_outfile, sample_id[n], min_hap_score , min_deep_score, hg_to_snps)
+            pick_leaf(hg_to_score, group_to_parent, leaf_outfile, sample_id[n], min_hap_score , min_deep_score, hg_to_snps, trunc_haps)
             get_all_subgroups(hg_to_score, all_outfile, sample_id[n])
+
+# was supposed to be a recursive way of adding truncated haplogroup names
+# not currently working, probably not necessary to do it recursively anyway...			        
+def trunc_hap(hg, trunc_haps, group_to_parent):
+	print("\tTruncating %s" % (hg))
+	if hg == '':
+		hg='A0-T'				#If already past the root, just set hg to root.
+	if hg in ['A0-T', 'A00']:
+		trunc_haps[hg] = hg
+	while hg not in trunc_haps:
+		parent_hg = get_parent_hg(group_to_parent, hg)
+		if parent_hg == '':
+			parent_hg='A0-T'
+			print("Error!")
+			#sys.exit()
+		print("Not already stored. Now checking for %s" % (parent_hg))
+		if parent_hg in trunc_haps:
+			print("%s is stored. Truncating %s to %s" % (parent_hg, hg, trunc_haps[parent_hg]))
+			trunc_haps[hg] = trunc_haps[parent_hg]	
+		hg = parent_hg
+
+# could be improved with a better haplogroup dictionary- fix in re-write	           
+def get_trunc_haps(haps_file, all_hgs, group_to_parent):
+	"""get a list of truncated haplogroup names to use in assignments"""
+	trunc_haps = dict()
+	if haps_file:
+		with open(haps_file, 'r') as infp:
+			for line in infp:
+				hap = line.strip()
+				trunc_haps[hap] = hap
+				for parent_hap in get_ancestry(hap, group_to_parent):		#add parents of truncated haplogroups too
+					if parent_hap not in trunc_haps:
+						trunc_haps[parent_hap] = parent_hap
+		for hg in all_hgs:		#go through each haplogroup and find its nearest ancestor from the list of truncated haplogroups
+			if hg not in trunc_haps:
+				ancestor_hgs = get_ancestry(hg, group_to_parent)
+				for parent_hg in ancestor_hgs:
+					if parent_hg in trunc_haps:
+						trunc_haps[hg] = trunc_haps[parent_hg]
+						break
+				if not hg in trunc_haps:
+					trunc_haps[hg] = hg
+			#trunc_hap(hg, trunc_haps, group_to_parent)		#instead of the above loop, would try this for each hg in all_hgs if function worked...
+	else:
+		for hg in all_hgs:
+			trunc_haps[hg] = hg
+	return trunc_haps
+		
 
 def main(args):
     path = os.getcwd()
@@ -235,7 +283,7 @@ def main(args):
     	elif os.path.isfile(vcf):
     		print('Using plink to create .raw file from vcf %s' % (vcf))
     		#subprocess.call(['plink', '--vcf', project_name, '--recodeAD', '--out', project_name])
-		subprocess.call(['plink', '--vcf', '%s.vcf' % (project_name), '--recodeAD', '--out', project_name])
+    		subprocess.call(['plink', '--vcf', '%s.vcf' % (project_name), '--recodeAD', '--out', project_name])
     	else:
     		print('Unable to find suitable genotpye files for processing. Please ensure that there is a plink library or vcf with the prefix provided (%s)' % (file_prefix))
     else:
@@ -267,13 +315,16 @@ def main(args):
 
     # use genotype calls to track number of derived snps called for a hg
     haplogroup_score, hg_snp_dict = parse_plink_files.tally_defining_snps(n_individuals, genotypes, hg_snp_dict, issog_id_dict, der_allele_dict)
+
+    trunc_haps = get_trunc_haps(args.truncate_haps, list(hg_snp_dict.keys()), group_to_parent)
     # assign samples to hg
-    assign_subgroups(path, group_to_parent, n_individuals, haplogroup_score, hg_snp_dict, genotypes, issog_id_dict, sample_ids, args.min_hap_score , args.min_deep_score, args.out, args.ancestral_hg_depth)
+    assign_subgroups(path, group_to_parent, n_individuals, haplogroup_score, hg_snp_dict, genotypes, issog_id_dict, sample_ids, args.min_hap_score , args.min_deep_score, args.out, args.ancestral_hg_depth, trunc_haps)    
+    
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='SNAPPY')
     
-    parser.add_argument('--version', action='version', version='%(prog)s 0.2')
+    parser.add_argument('--version', action='version', version='%(prog)s 0.2.2')
     parser.add_argument('--infile', help='prefix to plink library', required=True)
     parser.add_argument('--min_hap_score', help='minimum haplogroup score to be considered as assignment', nargs='?', const=1, type=float, default=0.75, required=False)
     parser.add_argument('--min_deep_score', help='minimum score to switch to deeper node for final assignment', nargs='?', const=1, type=float, default=0.8, required=False)
@@ -284,6 +335,8 @@ if __name__ == '__main__':
     parser.add_argument('--hg2snp', help='file listing markers and haplogroups', nargs='?', const=1, type=str, default='y_hg_and_snps.sort', required=False)
     parser.add_argument('--tree_strct', help='file listing haplogroup parent-child relationships for haplogroups that do not confrom to naming convetions', nargs='?', const=1, type=str, default='tree_structure.txt', required=False)
     parser.add_argument('--ancestral_hg_depth', help='number of ancestral haplogroups to check when considering whether a haplogroup receives a score', nargs='?', const=1, type=int, default=2, required=False)
+    parser.add_argument('--truncate_haps', help='file with list of haplogroups past which SNAPPY will not make assignments', nargs='?', const=1, type=str, required=False)
+    #parser.add_argument('--truncate_haps', help='file with list of haplogroups past which SNAPPY will not make assignments', action="store_const", const=1, required=False)
     
     args = parser.parse_args()
     main(args)

@@ -268,58 +268,57 @@ def get_trunc_haps(haps_file, all_hgs, group_to_parent):
 		
 
 def main(args):
-    path = os.getcwd()
-    project_name = args.infile
-    file_prefix = path + '/' + project_name
-    bed = file_prefix + '.bed'
-    vcf = file_prefix + '.vcf'
-    raw = file_prefix + '.raw'
+	path = os.getcwd()
+	project_name = args.infile
+	file_prefix = path + '/' + project_name
+	bed = file_prefix + '.bed'
+	vcf = file_prefix + '.vcf'
+	raw = file_prefix + '.raw'
 
-    # create .raw plink file to interpret genotypes from binary files
-    if not os.path.isfile(raw):
-    	if os.path.isfile(bed):
-    		print('Using plink to create .raw file from %s plink library' % (project_name))
-    		subprocess.call(['plink', '--bfile', project_name, '--recodeAD', '--out', project_name])
-    	elif os.path.isfile(vcf):
-    		print('Using plink to create .raw file from vcf %s' % (vcf))
+	# create .raw plink file to interpret genotypes from binary files
+	if not os.path.isfile(raw):
+		if os.path.isfile(bed):
+			print('Using plink to create .raw file from %s plink library' % (project_name))
+			subprocess.call(['plink', '--bfile', project_name, '--recodeAD', '--out', project_name])
+		elif os.path.isfile(vcf):
+			print('Using plink to create .raw file from vcf %s' % (vcf))
     		#subprocess.call(['plink', '--vcf', project_name, '--recodeAD', '--out', project_name])
-    		subprocess.call(['plink', '--vcf', '%s.vcf' % (project_name), '--recodeAD', '--out', project_name])
-    	else:
-    		print('Unable to find suitable genotpye files for processing. Please ensure that there is a plink library or vcf with the prefix provided (%s)' % (file_prefix))
-    else:
-    	print('Using %s for genotype input' % (raw))
+			subprocess.call(['plink', '--vcf', '%s.vcf' % (project_name), '--recodeAD', '--out', project_name])
+		else:
+			print('Unable to find suitable genotpye files for processing. Please ensure that there is a plink library or vcf with the prefix provided (%s)' % (file_prefix))
+	else:
+		print('Using %s for genotype input' % (raw))
 
-    # build reference dictionaries
-    der_allele_dict = parse_ref_files.build_derived_allele_dict('%s/%s/%s' % (path, args.ref_files_dir, args.pos2allele) )
-    bim_id_dict, bim_allele_dict = parse_ref_files.build_bim_id_dict( '%s/%s.bim' % (path, project_name) )
-    hg_snp_dict = parse_ref_files.build_hg_snp_dict('%s/%s/%s' % (path, args.ref_files_dir, args.hg2snp) )
-    issog_id_dict = parse_ref_files.build_isogg_id_dict('%s/%s/%s' % (path, args.ref_files_dir, args.id2pos))
+	# build reference dictionaries
+	der_allele_dict = parse_ref_files.build_derived_allele_dict('%s/%s/%s' % (path, args.ref_files_dir, args.pos2allele) )
+	bim_id_dict, bim_allele_dict = parse_ref_files.build_bim_id_dict( '%s/%s.bim' % (path, project_name) )
+	hg_snp_dict = parse_ref_files.build_hg_snp_dict('%s/%s/%s' % (path, args.ref_files_dir, args.hg2snp) )
+	issog_id_dict = parse_ref_files.build_isogg_id_dict('%s/%s/%s' % (path, args.ref_files_dir, args.id2pos))
 	# read in structure of tree for non-conforming haplogroup names
-    group_to_parent = parse_ref_files.getHaploGroup2Parent('%s/%s/%s' % (path, args.ref_files_dir, args.tree_strct))
+	group_to_parent = parse_ref_files.getHaploGroup2Parent('%s/%s/%s' % (path, args.ref_files_dir, args.tree_strct))
 
-    # get the genotype calls for each sample
-    genotypes = []
-    sample_ids = []
-    n_individuals = 0
-    with open(raw, 'r') as raw_data:
-        bim_snp_ids = raw_data.readline().rstrip('\n').split(' ')[6:]
-        for line in raw_data:
-            line = line.rstrip('\n').split(' ')
-            sample_id = line[1]
-            sample_ids.append(sample_id)
+	# get the genotype calls for each sample
+	genotypes = []
+	sample_ids = []
+	n_individuals = 0
+	with open(raw, 'r') as raw_data:
+		bim_snp_ids = raw_data.readline().rstrip('\n').split(' ')[6:]
+		for line in raw_data:
+			line = line.rstrip('\n').split(' ')
+			sample_id = line[1]
+			sample_ids.append(sample_id)
 
-            data = line[6:]
-            genotype = parse_plink_files.get_individual_gt(bim_allele_dict, bim_id_dict, bim_snp_ids, data)
-            genotypes.append(genotype)
-            n_individuals += 1
+			data = line[6:]
+			genotype = parse_plink_files.get_individual_gt(bim_allele_dict, bim_id_dict, bim_snp_ids, data)
+			genotypes.append(genotype)
+			n_individuals += 1
 
-    # use genotype calls to track number of derived snps called for a hg
-    haplogroup_score, hg_snp_dict = parse_plink_files.tally_defining_snps(n_individuals, genotypes, hg_snp_dict, issog_id_dict, der_allele_dict)
+	# use genotype calls to track number of derived snps called for a hg
+	haplogroup_score, hg_snp_dict = parse_plink_files.tally_defining_snps(n_individuals, genotypes, hg_snp_dict, issog_id_dict, der_allele_dict)
 
-    trunc_haps = get_trunc_haps(args.truncate_haps, list(hg_snp_dict.keys()), group_to_parent)
-    # assign samples to hg
-    assign_subgroups(path, group_to_parent, n_individuals, haplogroup_score, hg_snp_dict, genotypes, issog_id_dict, sample_ids, args.min_hap_score , args.min_deep_score, args.out, args.ancestral_hg_depth, trunc_haps)    
-    
+	trunc_haps = get_trunc_haps(args.truncate_haps, list(hg_snp_dict.keys()), group_to_parent)
+	# assign samples to hg
+	assign_subgroups(path, group_to_parent, n_individuals, haplogroup_score, hg_snp_dict, genotypes, issog_id_dict, sample_ids, args.min_hap_score , args.min_deep_score, args.out, args.ancestral_hg_depth, trunc_haps)    
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='SNAPPY')

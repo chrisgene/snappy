@@ -4,9 +4,21 @@
 
 SNAPPY is a software program used to assign Y-chromosome phylogeny-informed haplogroups using dense genotype data. The program efficiently tests all haplogroups from a provided Y-chromosome haplogroup database to find the one that is best supported by input genotypes. Importantly, the method considers both the amount of support for the specific haplogroup, as well as its ancestral haplogroups. This accounts for the underlying genealogy the haplogroups represent, strengthening the accuracy of the assignments.
 
+## Test Installation:
+
+Download or clone [SNAPPY](https://www.github.com/chrisgene/snappy), then navigate in the terminal to the folder where SNAPPY is saved. Run
+
+`python SNAPPY_v123.py --infile test_data/TGP_chrY_MEGA --out test_SNAPPY`
+
+Test SNAPPY's output against the output distributed with the software:
+
+`diff test_SNAPPY.all test_data/TGP_SNAPPY_results.all > test_SNAPPY_diffs.txt`
+
+A working installation of SNAPPY should yield an empty file "test_SNAPPY_diffs.txt".
+
 ## Quick Start:
 
-Download or clone [SNAPPY](www.github.com/chrisgene/snappy), then navigate in the terminal to the folder where SNAPPY is saved. The folder should also contain the files parse_ref_files.py, parse_plink_files.py, and a directory called ‘ref_files’ that contains four additional files. Run SNAPPY with the following command:
+Download or clone [SNAPPY](https://www.github.com/chrisgene/snappy), then navigate in the terminal to the folder where SNAPPY is saved. The folder should also contain the files parse_ref_files.py, parse_plink_files.py, and a directory called ‘ref_files’ that contains four additional files. Run SNAPPY with the following command:
 
 `python SNAPPY_v123.py --infile plink_library`
 

@@ -3,6 +3,8 @@ Usage
 
 Much of this is incorrect still. It was lifted from a read the docs tutorial and updated with actual information from SNAPPY shortly.
 
+.. _installation:
+
 Installation:
 -------------
 
@@ -123,8 +125,6 @@ Terms of Use:
 
 SNAPPY is published under a GPL-3.0 License. More information about the license is available `here <https://opensource.org/licenses/GPL-3.0>`_.
 
-
-.. _installation:
 
 Installation
 ------------

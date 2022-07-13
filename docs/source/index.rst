@@ -18,4 +18,5 @@ Contents
 
    usage
    description
-   new_features
+   advanced
+   miscellany

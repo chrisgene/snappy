@@ -1,31 +1,16 @@
 """
-assign_chrY_hg.py, by Alissa Severson, with Jonathan A. Shortt
+SNAPPY.py, by Alissa Severson, with Jonathan A. Shortt
 
-This script takes chrY data in plink format (.bim, .bed, .fam) and produces haplogroup assignments. It should be
-run in the same directory as the plink files, and the only given argument is the project name or prefix to the files.
-
-ex:
-python3 assign_chrY_hg.py oceania-males
-
-Currently, the ref_files are expected to be in the same directory as the data, so if that is not the case the paths
-will need to be updated. Two output files are produced, with default names chrY_hgs.out and chrY_hgs.all. chrY_hgs.out 
-contains the assignments and chrY_hgs.all lists all haplogroups with at least one snp present, and the accompanying 
-score as a reference. Please don't hesitate to get in touch with questions!
-
-Updated in v0.2 on 30July2019 by jas
-Added commandline arguments to specify names and directory of reference files.
-Added version tracking in arg parsing
-
-Added command line argument to specify the number of ancestral haplogroups to check when considering whether a haplogroup receives a score
+This script takes chrY data in plink format (.bim, .bed, .fam) and produces haplogroup assignments.
 """
-
 
 import os
 import os.path
 import sys
 import subprocess
-import parse_ref_files
-import parse_plink_files
+from snappy import *
+from snappy.bin.parse_ref_files import *        #these two lines aren't clean-looking but they do at least seem to work
+from snappy.bin.parse_plink_files import *
 import argparse
 
 def count_define_called_snps(subgroup_snps, pos_to_gt, isogg_id_to_pos):
@@ -267,7 +252,7 @@ def get_trunc_haps(haps_file, all_hgs, group_to_parent):
 	return trunc_haps
 		
 
-def main(args):
+def snappy(args):
 	path = os.getcwd()
 	project_name = args.infile
 	file_prefix = path + '/' + project_name
@@ -290,12 +275,13 @@ def main(args):
 		print('Using %s for genotype input' % (raw))
 
 	# build reference dictionaries
-	der_allele_dict = parse_ref_files.build_derived_allele_dict('%s/%s/%s' % (path, args.ref_files_dir, args.pos2allele) )
-	bim_id_dict, bim_allele_dict = parse_ref_files.build_bim_id_dict( '%s/%s.bim' % (path, project_name) )
-	hg_snp_dict = parse_ref_files.build_hg_snp_dict('%s/%s/%s' % (path, args.ref_files_dir, args.hg2snp) )
-	issog_id_dict = parse_ref_files.build_isogg_id_dict('%s/%s/%s' % (path, args.ref_files_dir, args.id2pos))
+	der_allele_dict = build_derived_allele_dict('%s/%s/%s' % (path, args.ref_files_dir, args.pos2allele) )
+	bim_id_dict, bim_allele_dict = build_bim_id_dict( '%s/%s.bim' % (path, project_name) )
+	hg_snp_dict = build_hg_snp_dict('%s/%s/%s' % (path, args.ref_files_dir, args.hg2snp) )
+	issog_id_dict = build_isogg_id_dict('%s/%s/%s' % (path, args.ref_files_dir, args.id2pos) )
+	
 	# read in structure of tree for non-conforming haplogroup names
-	group_to_parent = parse_ref_files.getHaploGroup2Parent('%s/%s/%s' % (path, args.ref_files_dir, args.tree_strct))
+	group_to_parent = getHaploGroup2Parent('%s/%s/%s' % (path, args.ref_files_dir, args.tree_strct))
 
 	# get the genotype calls for each sample
 	genotypes = []
@@ -309,12 +295,12 @@ def main(args):
 			sample_ids.append(sample_id)
 
 			data = line[6:]
-			genotype = parse_plink_files.get_individual_gt(bim_allele_dict, bim_id_dict, bim_snp_ids, data)
+			genotype = get_individual_gt(bim_allele_dict, bim_id_dict, bim_snp_ids, data)
 			genotypes.append(genotype)
 			n_individuals += 1
 
 	# use genotype calls to track number of derived snps called for a hg
-	haplogroup_score, hg_snp_dict = parse_plink_files.tally_defining_snps(n_individuals, genotypes, hg_snp_dict, issog_id_dict, der_allele_dict)
+	haplogroup_score, hg_snp_dict = tally_defining_snps(n_individuals, genotypes, hg_snp_dict, issog_id_dict, der_allele_dict)
 
 	trunc_haps = get_trunc_haps(args.truncate_haps, list(hg_snp_dict.keys()), group_to_parent)
 	# assign samples to hg
@@ -340,4 +326,3 @@ if __name__ == '__main__':
     args = parser.parse_args()
     main(args)
     sys.exit()
-main()

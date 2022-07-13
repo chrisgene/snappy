@@ -35,13 +35,3 @@ Test SNAPPY's output against the output distributed with the software:
    diff test_SNAPPY.all test_data/TGP_SNAPPY_results.all > test_SNAPPY_diffs.txt
 
 A working installation of SNAPPY should yield an empty file ``test_SNAPPY_diffs.txt``. 
-
-Citation:
-=========
-
-If you use SNAPPY, please cite our `preprint on bioRXiv<https://www.biorxiv.org/content/10.1101/454736v2>`_.
-
-Terms of Use:
--------------
-
-SNAPPY is published under a GPL-3.0 License. More information about the license is available `here <https://opensource.org/licenses/GPL-3.0>`_.

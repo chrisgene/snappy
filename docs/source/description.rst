@@ -8,8 +8,9 @@ After being called, SNAPPY searches for a .raw file with the correct prefix (con
 
 Genotypes from all samples, read in from the .raw file, are then stored as a list of dictionaries, with each dictionary containing key-value pairs consisting of Y-chromosome positions (keys) and allele (values) for each sample. SNAPPY then cycles through each sample’s genotypes and each Y-chromosome haplogroup stored in the reference dictionaries, counting the number of haplogroup-informative alleles present in the sample. This number, when divided by the sample’s number of non-missing haplogroup-informative positions, is the haplogroup’s score for the given sample. To illustrate, consider a haplogroup that is defined by 5 SNPs, and an individual who has been genotyped at these 5 sites. If the individual is missing one genotype, and has the derived allele for three of the sites, and the ancestral allele at the fifth site, then the score is 3/4=0.75. Importantly, a particular haplogroup’s score uses alleles from both its own haplogroup-informative positions as well as all its ancestral haplogroups (Figure 1). If all informative positions are missing for a given haplogroup, the score for the haplogroup is set to zero. Additionally, if no informative alleles from a particular haplogroup’s two most recent ancestors are present, that haplogroup will not be considered for assignment to a sample (e.g., referenced node in Figure 1C would not be considered because its two most recent ancestors lack informative alleles in the sample). Each haplogroup is evaluated independently for every individual, and the scores are stored in a two-dimensional numpy array to allow for efficient storage and quick processing.
  
- .. figure:: /supporting_images/snappy_readme_Fig1.png
-   :width: 90%
+ .. figure:: ../supporting_images/snappy_docs_fig1.png
+   :width: 60%
+   :align: center
 
 **Figure 1** - Possible ancestral haplogroup patterns used to inform if the indicated haplogroup (arrow) is supported by genotype data. Blue circles indicate the presence of haplogroup-informative alleles for a haplogroup, while gray represents haplogroups for which no informative alleles are present.
 

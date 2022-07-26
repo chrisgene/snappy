@@ -54,6 +54,11 @@ Finally, run ``snappy-build``:
    
 where ``genotyped_positions.txt`` is a file where each row gives the position of a genotyped site in the data to be used for haplogroup assignmenet, and ``ref_files/tree_strucutre.txt`` is the tree structure distributed file with the default reference files for SNAPPY.
 
+Instructions on Uninstalling SNAPPY:
+------------------------------------
+
+Simply run ``pip uninstall snappy`` from a terminal window. If prompted to confirm removal, press "y". 
+
 Notes and Considerations:
 =========================
 

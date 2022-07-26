@@ -27,12 +27,37 @@ All adjustable parameters can be accessed at runtime by calling SNAPPY followed 
 Example:
 ::
 
-   python SNAPPY_v123.py --infile plink_prefix --min_hap_score 0.7
+   snappy --infile plink_prefix --min_hap_score 0.7
+   
+Auxiliary Tools:
+================
+ 
+SNAPPY's installation includes three additional tools to create a custom SNP library created from ISOGG to allow users to customize their library based on their genotyped sites, and to allow a user to make haplogroup calls with the most up-to-date data possible. These tools are: ``snappy-clean``, ``snappy-qc``, and ``snappy-build``. Each of these tools has options that can be viewed at run-time via the ``--help`` argument.
+
+Creating Custom Reference Libraries:
+------------------------------------
+
+To start creating a library, download the most recent SNP index table from `ISOGG <https://isogg.org/tree/ISOGG_YDNA_SNP_Index.html>`_ as a .tsv file. In the example below, the .tsv is saved as ``ISOGG_SNP_index.tsv``. Use the downloaded table as input to ``snappy-clean`` as follows:
+::
+
+   snappy-clean --infile ISOGG_SNP_index.tsv
+   
+Then run ``snappy-qc`` as follows:
+::
+ 
+   snappy-qc --infile isogg_snps.txt
+   
+Finally, run ``snappy-build``:
+::
+
+   snappy-build --snp_list snp_qc.txt --pos_file genotyped_positions.txt
+   
+where ``genotyped_positions.txt`` is a file where each row gives the position of a genotyped site in the data to be used for haplogroup assignmenet.
 
 Notes and Considerations:
 =========================
 
 - All reference files included in the current distribution of SNAPPY use positions from human genome version GRCh37. Genotype positions from other versions of the human genome may result in inaccurate results.
 - Prior to running SNAPPY, it may be necessary to check for strand concordance with the Y-chromosome of GRCh37, and to flip and/or remove ambiguous sites and those whose variants correspond to genotyping from the non-reference strand.
-- A key aspect of the SNAPPY’s success is the robust nature of the Y-chromosome tree and the inclusion of informative variants on the Multi-Ethnic Genotyping Array (MEGA). SNAPPY’s current implementation was designed and tested using genotyping data from the MEGA, which includes over 11,000 variants on the Y-chromosome. SNAPPY should readily apply to other arrays, but care should be taken to ensure that arrays have a sufficient number of loci that are included in the reference library.
+- A key aspect of the SNAPPY’s accuracy is the robust nature of the Y-chromosome tree and the inclusion of informative variants on the Multi-Ethnic Genotyping Array (MEGA). SNAPPY’s current reference library was designed and tested using genotyping data from the MEGA, which includes over 11,000 variants on the Y-chromosome. SNAPPY should readily apply to other arrays, but care should be taken to ensure that arrays have a sufficient number of genotyped loci are at haplogroup-informative sites.
 - Genotyping by sequencing (GBS) is increasingly popular, and data generated through GBS is compatible with SNAPPY, provided that all sites passing quality filters are included in the output genotypes during variant calling (this can be accomplished, for example, using the --emit-all argument in GATK’s variant calling pipeline). Otherwise, haplogroup-informative sites where the reference sequence used in variant calling has a derived allele may not be included in the genotype file. 

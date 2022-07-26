@@ -50,9 +50,9 @@ Then run ``snappy-qc`` as follows:
 Finally, run ``snappy-build``:
 ::
 
-   snappy-build --snp_list snp_qc.txt --pos_file genotyped_positions.txt
+   snappy-build --snp_list snp_qc.txt --pos_file genotyped_positions.txt --tree_file ref_files/tree_structure.txt
    
-where ``genotyped_positions.txt`` is a file where each row gives the position of a genotyped site in the data to be used for haplogroup assignmenet.
+where ``genotyped_positions.txt`` is a file where each row gives the position of a genotyped site in the data to be used for haplogroup assignmenet, and ``ref_files/tree_strucutre.txt`` is the tree structure distributed file with the default reference files for SNAPPY.
 
 Notes and Considerations:
 =========================

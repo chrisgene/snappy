@@ -18,7 +18,7 @@ where ``plink_library`` is the prefix name of the genotypes to be analyzed. Note
 Installation:
 -------------
 
-Download or clone `SNAPPY <https://www.github.com/chrisgene/snappy/>`_, then navigate in the roo of the the local SNAPPY repository in terminal. Run the following commands:
+Download or clone `SNAPPY <https://www.github.com/chrisgene/snappy/>`_, then navigate in the root of the the local SNAPPY repository in terminal. Run the following commands:
 ::
 
    python setup.py sdist
@@ -27,7 +27,7 @@ Download or clone `SNAPPY <https://www.github.com/chrisgene/snappy/>`_, then nav
 SNAPPY is now installed as a command-line tool and can be accessed from any directory. To test the installation, navigate to the root of the local SNAPPY repository, then run:
 ::
 
-   snappy --infile test_data/TGP_chrY --out test_SNAPPY
+   snappy --infile test_data/TGP_chrY_MEGA --out test_SNAPPY
 
 Test SNAPPY's output against the output distributed with the software:
 ::
